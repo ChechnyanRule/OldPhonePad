@@ -1,0 +1,63 @@
+static string OldPhonePad(string input){
+    // Mapping of phone keypad keys to corresponding characters. I think using a dictionnary is the way here. I was thinking of using an Array, but it's less adapted to my purpose.
+    Dictionary<char, string> phoneKeys = new Dictionary<char, string>{
+        {'1', "&'("},
+        {'2', "abc"},
+        {'3', "def"},
+        {'4', "ghi"},
+        {'5', "jkl"},
+        {'6', "mno"},
+        {'7', "pqrs"},
+        {'8', "tuv"},
+        {'9', "wxyz"},
+        {'0', " "},
+        {'*', "*"}
+    };
+
+    string output = "";
+    string storeSubstring = "";
+    List<string> arraySubstrings = new List<string>(); // The substrings are the group of consecutive strokes. For example, 44444 is a substring. The idea is to isolate substrings in order to manipulate them more easily later.
+
+    // This piece of logic groups consecutive identical keys. The idea is to simulate the behavior of a user hitting the strokes of an old phone keypad. if he hits the same stroke, the associated value fetched from the dictionnary, shifts to the next one, and so on and so forth. I also had to implement circular logic, in case the user hits the same keys more than the number of possible chars. 
+
+    for (int i = 0; i < input.Length; i++){
+        if (i < input.Length - 1 && input[i] == input[i + 1]){
+            storeSubstring += input[i];
+        }
+        else{
+            storeSubstring += input[i];
+            arraySubstrings.Add(storeSubstring);
+            storeSubstring = ""; // Resets for the next sequence
+        }
+    }
+
+    // Explanation of the circular logic in the readme. It's too long to put it here.
+
+    for (int i = 0; i < arraySubstrings.Count; i++){ 
+        char key = arraySubstrings[i][0];   // This line gets the key being pressed
+        int pressCount = arraySubstrings[i].Length; // Counts how many times the key was pressed
+
+        if (key == '*'){
+            // It removes the last character from output, but only if there's something to remove. If the string is empty, there is nothing to remove, so we have to handle this case as well
+            if (output.Length > 0){
+                output = output.Substring(0, output.Length - 1);
+            }
+        }
+        else if (phoneKeys.ContainsKey(key)){
+            string letters = phoneKeys[key];
+
+            // If the user presses fewer times than the number of characters in the key, no need for the modulo formula. We just use the index directly 
+            int index;
+            if (pressCount <= letters.Length){
+                index = pressCount - 1;  // Just takes the corresponding letter. We do -1 to align with the indexation that starts from 0.
+            }
+            else{
+                index = (pressCount - 1) % letters.Length; // Only apply modulo if needed
+            }
+
+            output += letters[index]; // Append the correct letter
+        }
+    }
+
+    return output;
+}
